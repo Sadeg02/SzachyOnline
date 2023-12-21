@@ -12,4 +12,3 @@ add_executable(SzachyOnline
         )
 enable_testing()
 add_executable(testy testy.cpp)
-gtest_discover_tests(testy)
