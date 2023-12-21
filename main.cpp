@@ -11,7 +11,7 @@ int main() {
         std::getline(std::cin, rozkaz);
         std::istringstream linia(rozkaz);
         if(rozkaz == "q"){
-            std::cout << "Rozłączanie"<<std::endl;
+            std::cout << "Rozlaczanie"<<std::endl;
             break;
         }
         char figura;
