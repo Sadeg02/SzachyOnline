@@ -9,5 +9,7 @@ add_executable(SzachyOnline
         ruchy.cpp
         plansza.cpp
         plansza.h
-        testy.cpp)
-add_test(NAME Testy COMMAND Testy)
+        )
+enable_testing()
+add_executable(testy testy.cpp)
+gtest_discover_tests(testy)
