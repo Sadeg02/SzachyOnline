@@ -29,10 +29,12 @@ for(int i=0;i<rozmiar;i++){
     }
     szachownica[1][1]='w';
     szachownica[1][8]='w';
+    szachownica[4][4]='w'; //test
     szachownica[8][1]='W';
     szachownica[8][8]='W';
     szachownica[1][2]='s';
     szachownica[1][7]='s';
+    szachownica[4][5]='s'; //test
     szachownica[8][2]='S';
     szachownica[8][7]='S';
     szachownica[1][3]='g';

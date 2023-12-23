@@ -40,7 +40,12 @@ public:
 #define FIGURY_H
 #include "plansza.h"
 char kolor(char kol);
-
+void blad(int numer);
+//figury
 void pion(plansza& plan, char sym, int starex, int starey, int nowex, int nowey);
-
+void wieza(plansza& plan,char sym , int starex , int starey , int nowex ,int nowey);
+void skoczek(plansza& plan, char sym, int starex, int starey, int nowex, int nowey);
+void goniec(plansza& plan, char sym, int starex, int starey, int nowex, int nowey);
+void krol(plansza &plan, char sym, int starex, int starey, int nowex, int nowey);
+void hetman(plansza &plan, char sym, int starex, int starey, int nowex, int nowey);
 #endif // FIGURY_H
