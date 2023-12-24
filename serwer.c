@@ -13,19 +13,22 @@
 
 #define PORT 12345
 #define MAXSTOLY 2
+#define BRAK_STOLOW 0
+#define SA_STOLY 1
 
 typedef struct {
     plansza szachownica;
     int ilegraczy;
-    int tura;
+    char tura;
     int koniec;
     bool dostepny;
-    int bialygracz;
-    int czarnygracz;
 } stol;
 
 stol stoly[MAXSTOLY];
-pthread_mutex_t mutexStoly;
+int main();
+void stworzStoly(int ile, stol stoly[]);
+void *socketThread(void *arg);
+void rozpocznij(int newSocket,char kolor,stol* s);
 
 void stworzStoly(int ile, stol stoly[]) {
     for (int i = 0; i < ile; i++) {
@@ -39,19 +42,37 @@ void stworzStoly(int ile, stol stoly[]) {
 void *socketThread(void *arg) {
     int newSocket = *((int *) arg);
     int n;
-
+    char kolorgracza;
+    int id=-1;
     // Tutaj możesz sprawdzić dostępność stołów
-    pthread_mutex_lock(&mutexStoly);
     for (int i = 0; i < MAXSTOLY; i++) {
         if (stoly[i].dostepny) {
-
-
+            id=i;
+            stoly[i].ilegraczy+=1;
+            kolorgracza='B';
+            if(stoly[i].ilegraczy==2){
+                kolorgracza='C';
+                stoly[i].dostepny=false;
+            }
             break;
         }
     }
-    pthread_mutex_unlock(&mutexStoly);
+    //informacja o stole
+    if(id==-1){
+        if ( send(newSocket, BRAK_STOLOW, sizeof(int), 0) < 0){
+            perror("blad brak stolow");
+            exit(EXIT_FAILURE);
+        }
+        pthread_exit(NULL);
+    }else{
+        if (0 > send(newSocket, SA_STOLY, sizeof(int), 0)){
+            perror("blad sa stoly");
+            exit(EXIT_FAILURE);
+        }
+    }
 
-    // Reszta kodu...
+    //jest stol rozpocznij rozgrywke
+    rozpocznij(newSocket,kolorgracza,&stoly[id]);
 
     // Zamknij gniazdo klienta i zwolnij zasoby
     close(newSocket);
@@ -59,13 +80,13 @@ void *socketThread(void *arg) {
     pthread_exit(NULL);
 }
 
-int main() {
-    // Inicjalizacja mutexu
-    if (pthread_mutex_init(&mutexStoly, NULL) != 0) {
-        perror("Błąd podczas inicjalizacji mutexu");
-        exit(EXIT_FAILURE);
-    }
+void rozpocznij(int newSocket,char kolor,stol* s){
 
+}
+
+
+
+int main() {
     // Inicjalizacja stolów
     stworzStoly(MAXSTOLY, stoly);
 

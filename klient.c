@@ -8,17 +8,41 @@
 
 #define PORT 12345
 #define BUFFER_SIZE 256
-void showBoard(char szachownica[],int rozmiar);
-void showBoard(char szachownica[],int rozmiar) {
-    // Wyświetl planszę szachową
-    printf("Plansza:\n");
-    for (int i = 0; i < rozmiar; ++i) {
-        printf("%c",szachownica[i]);
+
+void rozpocznijGre(int socket);
+void interfejs(int numer,char kolor);
+
+void interfejs(int numer,char kolor){
+    switch (numer) {
+        case 1:
+            printf("Witaj zaraz rozpocznie sie rozgrywka\n");
+            if(kolor=='B'){
+                printf("Bedziesz gral Bialymi figurami, ktre sa reprezentowane przez male litery \n");
+            }else if(kolor =='C'){
+                printf("Bedziesz gral Czarnymi figurami, ktre sa reprezentowane przez wielkie litery \n");
+            }else{
+                printf("blad nie wybralo kolru zresetuj gre\n");
+            }
+            printf("Wykonuj ruchy w nastepujacy sposob w formacie: \"figura ObecneXY PrzyszleXY\", czyli np.(p 21 31 ruch piona z pozycji 21 na pozycje 31)\n");
+        case 2:
+
     }
+}
+void rozpocznijGre(int socket){
+    char kolorgracza;
+    //pobierz kolor od serwera
+    if (recv(socket, &kolorgracza,1, 0) < 0) {
+        perror("dostepnosc error");
+        exit(EXIT_FAILURE);
+    }
+    //wprowadzenie
+    interfejs(1,kolorgracza);
 }
 
 int kut() {
     int clientSocket;
+    int dostepneStoly;
+
     struct sockaddr_in serverAddr;
     char buffer[BUFFER_SIZE];
     char move[BUFFER_SIZE];
@@ -40,29 +64,18 @@ int kut() {
         close(clientSocket);
         return EXIT_FAILURE;
     }
-
-    while (1) {
-        if (recv(clientSocket, buffer, sizeof(buffer), 0)==-1){
-        // Otrzymaj planszę od serwera
-        memset(buffer, 0, sizeof(buffer));
-        recv(clientSocket, buffer, sizeof(buffer), 0);
-        showBoard(buffer,sizeof(buffer));
-
-        // Wprowadź ruch
-        printf("Enter your move (format: [figure] [stareX] [stareY] [noweX] [noweY]): ");
-        fgets(move, sizeof(move), stdin);
-
-        // Wyślij ruch do serwera
-        send(clientSocket, move, strlen(move), 0);
-
-        // Otrzymaj planszę po ruchu
-        memset(buffer, 0, sizeof(buffer));
-        recv(clientSocket, buffer, sizeof(buffer), 0);
-        showBoard(buffer,sizeof(buffer));
-        }else{
-            printf("Wszystkie stoly zajete");
-        }
+    printf("Witaj w SzachyOnline sprobujemy znalezc stol dla ciebie :)\n");
+    if (recv(clientSocket, &dostepneStoly,1, 0) < 0) {
+        perror("dostepnosc error");
+        exit(EXIT_FAILURE);
     }
+    if(dostepneStoly) {
+        rozpocznijGre(clientSocket);
+    }else{
+        printf("Wszystkie stoly zajete");
+    }
+
+
 
     close(clientSocket);
     return 0;

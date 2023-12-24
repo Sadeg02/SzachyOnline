@@ -7,9 +7,9 @@
 
 
 #define ROZMIAR 9
-#define TRWA 0
-#define WINBIALE 1
-#define WINCZARNE 2
+#define TRWA 1
+#define WINBIALE 2
+#define WINCZARNE 3
 
 void blad(int numer) {
     switch (numer) {
