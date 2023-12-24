@@ -1,4 +1,4 @@
-/*#include <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -42,6 +42,7 @@ int kut() {
     }
 
     while (1) {
+        if (recv(clientSocket, buffer, sizeof(buffer), 0)==-1){
         // Otrzymaj planszę od serwera
         memset(buffer, 0, sizeof(buffer));
         recv(clientSocket, buffer, sizeof(buffer), 0);
@@ -58,9 +59,11 @@ int kut() {
         memset(buffer, 0, sizeof(buffer));
         recv(clientSocket, buffer, sizeof(buffer), 0);
         showBoard(buffer,sizeof(buffer));
+        }else{
+            printf("Wszystkie stoly zajete");
+        }
     }
 
     close(clientSocket);
     return 0;
 }
- */

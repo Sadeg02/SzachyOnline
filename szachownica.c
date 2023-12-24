@@ -4,38 +4,44 @@
 #include <stdio.h>
 #include "szachownica.h"
 
-void inicjalizujSzachownice(char szachownica[][ROZMIAR]) {
+void inicjalizujSzachownice(plansza *p) {
     for (int i = 0; i < ROZMIAR; i++) {
-        szachownica[0][i] = (char)(i + '0');
-        szachownica[i][0] = (char)(i + '0');
+        p->szachownica[0][i] = (char)(i + '0');
+        p->szachownica[i][0] = (char)(i + '0');
     }
+
     for (int i = 3; i < ROZMIAR - 2; i++) {
         for (int j = 1; j < ROZMIAR; j++) {
-            szachownica[i][j] = '.';
+            p->szachownica[i][j] = '.';
         }
     }
+
     for (int i = 1; i < ROZMIAR; i++) {
-        szachownica[2][i] = 'p';
-        szachownica[7][i] = 'P';
+        p->szachownica[2][i] = 'p';
+        p->szachownica[7][i] = 'P';
     }
-    szachownica[1][1] = 'w';
-    szachownica[1][8] = 'w';
-    szachownica[4][4] = 'w'; // test
-    szachownica[8][1] = 'W';
-    szachownica[8][8] = 'W';
-    szachownica[1][2] = 's';
-    szachownica[1][7] = 's';
-    szachownica[4][5] = 's'; // test
-    szachownica[8][2] = 'S';
-    szachownica[8][7] = 'S';
-    szachownica[1][3] = 'g';
-    szachownica[1][6] = 'g';
-    szachownica[8][3] = 'G';
-    szachownica[8][6] = 'G';
-    szachownica[1][4] = 'k';
-    szachownica[1][5] = 'h';
-    szachownica[8][4] = 'K';
-    szachownica[8][5] = 'H';
+
+    p->szachownica[1][1] = 'w';
+    p->szachownica[1][8] = 'w';
+    p->szachownica[4][4] = 'w'; // test
+    p->szachownica[8][1] = 'W';
+    p->szachownica[8][8] = 'W';
+
+    p->szachownica[1][2] = 's';
+    p->szachownica[1][7] = 's';
+    p->szachownica[4][5] = 's'; // test
+    p->szachownica[8][2] = 'S';
+    p->szachownica[8][7] = 'S';
+
+    p->szachownica[1][3] = 'g';
+    p->szachownica[1][6] = 'g';
+    p->szachownica[8][3] = 'G';
+    p->szachownica[8][6] = 'G';
+
+    p->szachownica[1][4] = 'k';
+    p->szachownica[1][5] = 'h';
+    p->szachownica[8][4] = 'K';
+    p->szachownica[8][5] = 'H';
 }
 
 

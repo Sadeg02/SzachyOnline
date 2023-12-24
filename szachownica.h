@@ -10,7 +10,7 @@
 typedef struct {
     char szachownica[ROZMIAR][ROZMIAR];
 } plansza;
-void inicjalizujSzachownice(char szachownica[][ROZMIAR]);
+void inicjalizujSzachownice(plansza *p);
 void show(const plansza *p);
 void zmiana(plansza *p, char sym, int starex, int starey, int nowex, int nowey);
 void wstaw(plansza *p, char sym, int x, int y);
