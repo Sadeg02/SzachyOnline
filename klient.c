@@ -76,7 +76,6 @@ int kut() {
     }
 
 
-
     close(clientSocket);
     return 0;
 }
