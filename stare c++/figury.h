@@ -48,4 +48,5 @@ void skoczek(plansza& plan, char sym, int starex, int starey, int nowex, int now
 void goniec(plansza& plan, char sym, int starex, int starey, int nowex, int nowey);
 void krol(plansza &plan, char sym, int starex, int starey, int nowex, int nowey);
 void hetman(plansza &plan, char sym, int starex, int starey, int nowex, int nowey);
+void ruch(plansza& plan, char figura, int stareX, int stareY, int noweX, int noweY);
 #endif // FIGURY_H

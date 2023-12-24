@@ -5,7 +5,6 @@
 #ifndef PLANSZA_H
 #define PLANSZA_H
 
-
 class plansza{
 public:
     plansza();
@@ -13,6 +12,7 @@ public:
     void zmiana(char sym,int starex,int starey , int nowex , int nowey);
     void wstaw(char sym,int x,int y);
     char symbol(int x,int y);
+    void przekaz(char* buffer);
     static const int rozmiar=9;
 protected:
 
@@ -20,7 +20,6 @@ protected:
     void inicjalizujPlansze();
     void odnowa();
 };
-
 
 
 #endif //PLANSZA_H

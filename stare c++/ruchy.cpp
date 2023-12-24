@@ -4,50 +4,6 @@
 #include "figury.h"
 #include "plansza.h"
 #include <iostream>
-/*
-//konstruktory
-figura::figura(plansza plan,char symbol,char kolor,int startx,int starty) : plan(plan),symbol(symbol),kolor(kolor),x(startx),y(starty){
-    plan.wstaw(symbol,startx,starty);
-}
-pion::pion(plansza plan,char kolor,int startx,int starty) : figura(plan,'P',kolor,startx,starty){
-
-}
-
-
-
-
-
-//ruchy
-
-
-// Implementacja metody dostępowej do pola symbol
-char figura::getSymbol() const {
-    return symbol;
-}
-
-// Implementacja metody dostępowej do pola kolor
-char figura::getKolor() const {
-    return kolor;
-}
-
-// Implementacja metody dostępowej do pola wspolrzedneX
-int figura::getx() const {
-    return x;
-}
-
-// Implementacja metody dostępowej do pola wspolrzedneY
-int figura::gety() const {
-    return y;
-}
-
-void pion::ruch(int rx , int ry) {
-    // TO DO: sprawdzanie poprawnosci
-    std::cout << "Ruch piona z (" << getx() << ", " << gety() << ") na ("<< rx <<","<<ry<<")"<< std::endl;
-    plan.zmiana(x,y,rx,ry);
-    x = rx;
-    y = ry;
-}
-*/
 void blad(int numer) {
     switch (numer) {
         case 1:
@@ -81,11 +37,9 @@ char kolor(char kol) {
 void pion(plansza& plan,char sym , int starex , int starey , int nowex ,int nowey){
 
     if(starey==nowey && ((starex+1)==nowex && kolor(sym)=='C' || (starex-1)==nowex && kolor(sym)=='B') && plan.symbol(nowex,nowey)=='.'){
-        std::cout<<"1"<<std::endl;
         plan.zmiana(sym,starex,starey,nowex,nowey);
     }else if((starey+1==nowey || starey-1==nowey)&&(starex+1==nowex && kolor(sym)=='C'||starex-1==nowex && kolor(sym)=='B')&&kolor(sym)!=kolor(plan.symbol(nowex,nowey))){
         plan.zmiana(sym,starex,starey,nowex,nowey);
-        std::cout<<"2"<<std::endl;
     }else{
         blad(1);
         return;
@@ -223,5 +177,41 @@ void hetman(plansza& plan, char sym, int starex, int starey, int nowex, int nowe
         }
     } else {
         blad(8); // Błąd: Ruch hetmana jest nieprawidłowy
+    }
+}
+
+void ruch(plansza& plan, char figura, int stareX, int stareY, int noweX, int noweY) {
+    try {
+        switch (figura) {
+            case 'p':
+            case 'P':
+                pion(plan, figura, stareX, stareY, noweX, noweY);
+                break;
+            case 'W':
+            case 'w':
+                wieza(plan, figura, stareX, stareY, noweX, noweY);
+                break;
+            case 'S':
+            case 's':
+                skoczek(plan, figura, stareX, stareY, noweX, noweY);
+                break;
+            case 'G':
+            case 'g':
+                goniec(plan, figura, stareX, stareY, noweX, noweY);
+                break;
+            case 'K':
+            case 'k':
+                krol(plan, figura, stareX, stareY, noweX, noweY);
+                break;
+            case 'H':
+            case 'h':
+                hetman(plan, figura, stareX, stareY, noweX, noweY);
+                break;
+            default:
+                // Obsługa błędnego symbolu figury
+                blad(9);
+        }
+    } catch (const std::invalid_argument& e) {
+        std::cout << "Bledny format ruchu. Poprawny format: [figura] [stareX][stareY] [noweX][noweY]" << std::endl;
     }
 }

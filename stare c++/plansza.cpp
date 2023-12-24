@@ -73,5 +73,19 @@ char plansza::symbol(int x, int y) {
 void plansza::odnowa() {
     inicjalizujPlansze();
 }
+void plansza::przekaz(char* buffer){
+    int index = 0;
+    for (int i = 0; i < rozmiar; ++i) {
+        for (int j = 0; j < rozmiar; ++j) {
+            buffer[index++] = szachownica[i][j];
+            buffer[index++] = ' ';  // Dodaj odstęp między znakami
+        }
+        buffer[index++] = '\n';  // Dodaj nową linię po każdym wierszu
+    }
+
+    buffer[index] = '\0';  // Dodaj null terminator na końcu bufora
+}
+
+
 
 
