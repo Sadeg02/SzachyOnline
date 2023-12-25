@@ -28,6 +28,9 @@ void blad(int numer) {
         case 9:
             printf("Nieprawidlowa figura\n");
             break;
+        case 10:
+            printf("Ruch poza plansze\n");
+            break;
         default:
             printf("Nieznany bład\n");
     }
@@ -180,10 +183,23 @@ void hetman(plansza *plan, char sym, int starex, int starey, int nowex, int nowe
     }
 }
 
-void ruch(plansza *plan, char figura, int stareX, int stareY, int noweX, int noweY) {
+int ruch(plansza *plan, char rozkaz[]) {
+    char figura;
+    char starePole[3], nowePole[3];
+
+    sscanf(rozkaz, "%c %2s %2s", &figura, starePole, nowePole);
+    int stareX = starePole[0] - '0';
+    int stareY = starePole[1] - '0';
+    int noweX = nowePole[0] - '0';
+    int noweY = nowePole[1] - '0';
+
     if (symbol(plan,stareX,stareY)!=figura){
         blad(9);
-        return;
+        return 1;
+    }
+    if(zakresPlanszy(noweX,noweY)){
+        blad(10);
+        return 1;
     }
     switch (figura) {
         case 'p':
@@ -212,14 +228,16 @@ void ruch(plansza *plan, char figura, int stareX, int stareY, int noweX, int now
             break;
         default:
             blad(9);
+            return 1;
     }
+    return 2;
 }
 
 bool zakresPlanszy(int nowex, int nowey) {
     return (nowex >= 1 && nowex <= 8) && (nowey >= 1 && nowey <= 8);
 }
 
-int stanGry(plansza *szachownica) {
+int czyKoniec(plansza *szachownica) {
     bool krolbiale = false;
     bool krolczarne = false;
     // Przeszukaj tablicę w poszukiwaniu króla 'k' lub 'K'

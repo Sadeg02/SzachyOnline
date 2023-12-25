@@ -5,14 +5,17 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <stdbool.h>
+#include "szachownica.h"
 
 #define PORT 12345
 #define BUFFER_SIZE 256
 
+int main();
 void rozpocznijGre(int socket);
-void interfejs(int numer,char kolor);
+void interfejs(int numer,char kolor,int socket,int* flaga);
 
-void interfejs(int numer,char kolor){
+void interfejs(int numer,char kolor,int socket,int* flaga){
     switch (numer) {
         case 1:
             printf("Witaj zaraz rozpocznie sie rozgrywka\n");
@@ -24,22 +27,74 @@ void interfejs(int numer,char kolor){
                 printf("blad nie wybralo kolru zresetuj gre\n");
             }
             printf("Wykonuj ruchy w nastepujacy sposob w formacie: \"figura ObecneXY PrzyszleXY\", czyli np.(p 21 31 ruch piona z pozycji 21 na pozycje 31)\n");
+            break;
         case 2:
-
+            printf("Oczekiweanie na drugiego gracza\n");
+            break;
+        case 3:
+            printf("Wykonaj ruch:");
+            *flaga = 1;
+            char rozkaz[50];
+            int pozwolenie;
+            plansza szachownica;
+            while(true) {
+                fgets(rozkaz, sizeof(rozkaz), stdin);
+                if (sscanf(rozkaz, "%*c %*2d %*2d") == 3) {
+                    if (0 > send(socket, rozkaz, strlen(rozkaz), 0)) {
+                        perror("blad wysylanie rozkazu");
+                        exit(EXIT_FAILURE);
+                    }
+                    if (recv(socket, &pozwolenie,1, 0) < 0) {
+                        perror("dostepnosc error");
+                        exit(EXIT_FAILURE);
+                    }
+                    if(pozwolenie == 2){
+                        if (recv(socket, &szachownica,sizeof(szachownica), 0) < 0) {
+                            perror("pokaz szachownice error");
+                            exit(EXIT_FAILURE);
+                        }
+                        show(&szachownica);
+                        break;
+                    }else{
+                        printf("Ruch byl zly wpisz jeszcze raz:");
+                    }
+                }else{
+                    printf("Zly format wpisz jeszcze raz:");
+                }
+            }
+            break;
+        case 4:
+            if(flaga){
+                printf("Drugi gracz robi ruch\n");
+                *flaga=0;
+            }
+            break;
     }
 }
 void rozpocznijGre(int socket){
     char kolorgracza;
+    int stan;
+    int flaga=1;
     //pobierz kolor od serwera
     if (recv(socket, &kolorgracza,1, 0) < 0) {
         perror("dostepnosc error");
         exit(EXIT_FAILURE);
     }
     //wprowadzenie
-    interfejs(1,kolorgracza);
+    interfejs(1,kolorgracza,socket,&flaga);
+    while(true) {
+        //odbiera stan
+        if (recv(socket, &stan, 1, 0) < 0) {
+            perror("stan error");
+            exit(EXIT_FAILURE);
+        }
+        //wykonuje odpowiednie komendy
+        interfejs(stan,kolorgracza,socket,&flaga);
+    }
+
 }
 
-int kut() {
+int main() {
     int clientSocket;
     int dostepneStoly;
 

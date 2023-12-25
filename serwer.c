@@ -82,6 +82,63 @@ void *socketThread(void *arg) {
 
 void rozpocznij(int newSocket,char kolor,stol* s){
 
+    const int oczekiwanie = 2;
+    const int pozwolenieRuch =3;
+    const int czekanieNaTure =4;
+
+    if (send(newSocket, kolor, 1, 0) < 0){
+        perror("wyslanie koloru");
+        exit(EXIT_FAILURE);
+    }
+    while(true){
+        if(s->dostepny==true){
+            if (send(newSocket,oczekiwanie, 1, 0) < 0){
+                perror("wyslanie oczekiwanie");
+                exit(EXIT_FAILURE);
+            }
+        }else if(s->tura==kolor){
+            char rozkaz[50];
+            int odp;
+            if (send(newSocket, pozwolenieRuch, 1, 0) < 0){
+                perror("wyslanie pozwolenia na ruch");
+                exit(EXIT_FAILURE);
+            }
+            if (recv(newSocket, &rozkaz,sizeof(rozkaz), 0) < 0) {
+                perror("dostepnosc error");
+                exit(EXIT_FAILURE);
+            }
+            //sprawdzanie rozkazu
+            odp=ruch(&(s->szachownica),rozkaz);
+            if(odp==2){
+                if (send(newSocket, odp, 1, 0) < 0){
+                    perror("dobry ruch");
+                    exit(EXIT_FAILURE);
+                }
+                if (send(newSocket, s->szachownica, sizeof(s->szachownica), 0) < 0){
+                    perror("wyslanie szachownicy");
+                    exit(EXIT_FAILURE);
+                }
+                if(s->tura=='C'){
+                    s->tura='B';
+                }else{
+                    s->tura='C';
+                }
+            }else if(odp==1){
+                if (send(newSocket, odp, 1, 0) < 0){
+                    perror("zly ruch");
+                    exit(EXIT_FAILURE);
+                }
+            }
+            //jesli tak wysylasz pozwolenie 1 lub 0 nie
+            //po pozwoleniu wyslij tablice
+
+        }else{
+            if (send(newSocket, czekanieNaTure, 1, 0) < 0){
+                perror("wyslanie oczekiwanie na ruch gracza");
+                exit(EXIT_FAILURE);
+            }
+        }
+    }
 }
 
 
@@ -131,8 +188,6 @@ int main() {
         pthread_detach(thread_id);
     }
 
-    // Zwolnij mutex
-    pthread_mutex_destroy(&mutexStoly);
 
     // Zamknij gniazdo serwera
     close(serverSocket);
