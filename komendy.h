@@ -19,7 +19,7 @@ void krol(plansza *plan, char sym, int starex, int starey, int nowex, int nowey)
 void hetman(plansza *plan, char sym, int starex, int starey, int nowex, int nowey);
 int ruch(plansza *plan, char rozkaz[]);
 bool zakresPlanszy(int nowex, int nowey);
-int stanGry(plansza *szachownica);
+int czyKoniec(plansza *szachownica);
 
 #endif // KOMENDY_H
 

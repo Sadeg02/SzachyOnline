@@ -47,7 +47,7 @@ char kolor(char kol) {
 }
 
 void pion(plansza *plan, char sym, int starex, int starey, int nowex, int nowey) {
-    if (starey == nowey && ((starex + 1) == nowex && kolor(sym) == 'C' || (starex - 1) == nowex && kolor(sym) == 'B') &&
+    if (starey == nowey && (((starex + 1) == nowex && kolor(sym) == 'C' )|| ((starex - 1) == nowex && kolor(sym) == 'B')) &&
         plan->szachownica[nowex][nowey] == '.') {
         plan->szachownica[nowex][nowey] = sym;
         plan->szachownica[starex][starey] = '.';
@@ -185,50 +185,54 @@ void hetman(plansza *plan, char sym, int starex, int starey, int nowex, int nowe
 
 int ruch(plansza *plan, char rozkaz[]) {
     char figura;
-    char starePole[3], nowePole[3];
+    int starePole,nowePole;
 
-    sscanf(rozkaz, "%c %2s %2s", &figura, starePole, nowePole);
-    int stareX = starePole[0] - '0';
-    int stareY = starePole[1] - '0';
-    int noweX = nowePole[0] - '0';
-    int noweY = nowePole[1] - '0';
+    sscanf(rozkaz, "%c %2d %2d", &figura, &starePole, &nowePole);
+    int stareX = starePole/10;
+    int stareY = starePole%10;
+    int noweX = nowePole/10;
+    int noweY = nowePole%10;
+    //printf("Figura: %c\n", figura);
+    //printf("Stare pole: (%d, %d)\n", stareX, stareY);
+    //printf("Nowe pole: (%d, %d)\n", noweX, noweY);
 
     if (symbol(plan,stareX,stareY)!=figura){
         blad(9);
         return 1;
     }
-    if(zakresPlanszy(noweX,noweY)){
+    if (!zakresPlanszy(noweX, noweY)) {
         blad(10);
         return 1;
-    }
-    switch (figura) {
-        case 'p':
-        case 'P':
-            pion(plan, figura, stareX, stareY, noweX, noweY);
-            break;
-        case 'W':
-        case 'w':
-            wieza(plan, figura, stareX, stareY, noweX, noweY);
-            break;
-        case 'S':
-        case 's':
-            skoczek(plan, figura, stareX, stareY, noweX, noweY);
-            break;
-        case 'G':
-        case 'g':
-            goniec(plan, figura, stareX, stareY, noweX, noweY);
-            break;
-        case 'K':
-        case 'k':
-            krol(plan, figura, stareX, stareY, noweX, noweY);
-            break;
-        case 'H':
-        case 'h':
-            hetman(plan, figura, stareX, stareY, noweX, noweY);
-            break;
-        default:
-            blad(9);
-            return 1;
+    } else {
+        switch (figura) {
+            case 'p':
+            case 'P':
+                pion(plan, figura, stareX, stareY, noweX, noweY);
+                break;
+            case 'W':
+            case 'w':
+                wieza(plan, figura, stareX, stareY, noweX, noweY);
+                break;
+            case 'S':
+            case 's':
+                skoczek(plan, figura, stareX, stareY, noweX, noweY);
+                break;
+            case 'G':
+            case 'g':
+                goniec(plan, figura, stareX, stareY, noweX, noweY);
+                break;
+            case 'K':
+            case 'k':
+                krol(plan, figura, stareX, stareY, noweX, noweY);
+                break;
+            case 'H':
+            case 'h':
+                hetman(plan, figura, stareX, stareY, noweX, noweY);
+                break;
+            default:
+                blad(9);
+                return 1;
+        }
     }
     return 2;
 }

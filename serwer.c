@@ -7,14 +7,13 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <pthread.h>
-#include "komendy.h"
-#include "szachownica.h"
+#include "komendy.c"
+#include "szachownica.c"
 #include <stdbool.h>
 
-#define PORT 12345
-#define MAXSTOLY 2
-#define BRAK_STOLOW 0
-#define SA_STOLY 1
+
+#define MAXSTOLY 3
+#define PORT 1100
 
 typedef struct {
     plansza szachownica;
@@ -28,7 +27,7 @@ stol stoly[MAXSTOLY];
 int main();
 void stworzStoly(int ile, stol stoly[]);
 void *socketThread(void *arg);
-void rozpocznij(int newSocket,char kolor,stol* s);
+void rozpocznij(int newSocket,char kolorgracza,stol* s);
 
 void stworzStoly(int ile, stol stoly[]) {
     for (int i = 0; i < ile; i++) {
@@ -36,13 +35,17 @@ void stworzStoly(int ile, stol stoly[]) {
         stoly[i].ilegraczy = 0;
         stoly[i].koniec = 0;
         stoly[i].dostepny = true;
+        stoly[i].tura='B';
     }
 }
 
 void *socketThread(void *arg) {
+    printf("nowy gracz \n");
     int newSocket = *((int *) arg);
-    int n;
-    char kolorgracza;
+    int brak_stolow=0;
+    int sa_stoly=1;
+
+    char kolorgracza=' ';
     int id=-1;
     // Tutaj możesz sprawdzić dostępność stołów
     for (int i = 0; i < MAXSTOLY; i++) {
@@ -59,13 +62,13 @@ void *socketThread(void *arg) {
     }
     //informacja o stole
     if(id==-1){
-        if ( send(newSocket, BRAK_STOLOW, sizeof(int), 0) < 0){
+        if ( send(newSocket, &brak_stolow, sizeof(int), 0) < 0){
             perror("blad brak stolow");
             exit(EXIT_FAILURE);
         }
         pthread_exit(NULL);
     }else{
-        if (0 > send(newSocket, SA_STOLY, sizeof(int), 0)){
+        if (0 > send(newSocket, &sa_stoly, sizeof(int), 0)){
             perror("blad sa stoly");
             exit(EXIT_FAILURE);
         }
@@ -75,32 +78,37 @@ void *socketThread(void *arg) {
     rozpocznij(newSocket,kolorgracza,&stoly[id]);
 
     // Zamknij gniazdo klienta i zwolnij zasoby
+    printf("odlaczony klient");
     close(newSocket);
 
     pthread_exit(NULL);
 }
 
-void rozpocznij(int newSocket,char kolor,stol* s){
+void rozpocznij(int newSocket,char kolorgracza,stol* s){
 
     const int oczekiwanie = 2;
     const int pozwolenieRuch =3;
     const int czekanieNaTure =4;
-
-    if (send(newSocket, kolor, 1, 0) < 0){
+    printf("kolor %c \n",kolorgracza);
+    if (send(newSocket, &kolorgracza, sizeof(kolorgracza), 0) < 0){
         perror("wyslanie koloru");
         exit(EXIT_FAILURE);
     }
     while(true){
         if(s->dostepny==true){
-            if (send(newSocket,oczekiwanie, 1, 0) < 0){
+            if (send(newSocket,&oczekiwanie, sizeof(int), 0) < 0){
                 perror("wyslanie oczekiwanie");
                 exit(EXIT_FAILURE);
             }
-        }else if(s->tura==kolor){
+        }else if(s->tura==kolorgracza){
             char rozkaz[50];
             int odp;
-            if (send(newSocket, pozwolenieRuch, 1, 0) < 0){
+            if (send(newSocket, &pozwolenieRuch, sizeof(int), 0) < 0){
                 perror("wyslanie pozwolenia na ruch");
+                exit(EXIT_FAILURE);
+            }
+            if (send(newSocket, &(s->szachownica), sizeof(s->szachownica), 0) < 0){
+                perror("wyslanie szachownicy");
                 exit(EXIT_FAILURE);
             }
             if (recv(newSocket, &rozkaz,sizeof(rozkaz), 0) < 0) {
@@ -110,11 +118,11 @@ void rozpocznij(int newSocket,char kolor,stol* s){
             //sprawdzanie rozkazu
             odp=ruch(&(s->szachownica),rozkaz);
             if(odp==2){
-                if (send(newSocket, odp, 1, 0) < 0){
+                if (send(newSocket, &odp, sizeof(int), 0) < 0){
                     perror("dobry ruch");
                     exit(EXIT_FAILURE);
                 }
-                if (send(newSocket, s->szachownica, sizeof(s->szachownica), 0) < 0){
+                if (send(newSocket, &(s->szachownica), sizeof(s->szachownica), 0) < 0){
                     perror("wyslanie szachownicy");
                     exit(EXIT_FAILURE);
                 }
@@ -124,7 +132,7 @@ void rozpocznij(int newSocket,char kolor,stol* s){
                     s->tura='C';
                 }
             }else if(odp==1){
-                if (send(newSocket, odp, 1, 0) < 0){
+                if (send(newSocket, &odp, sizeof(int), 0) < 0){
                     perror("zly ruch");
                     exit(EXIT_FAILURE);
                 }
@@ -133,7 +141,7 @@ void rozpocznij(int newSocket,char kolor,stol* s){
             //po pozwoleniu wyslij tablice
 
         }else{
-            if (send(newSocket, czekanieNaTure, 1, 0) < 0){
+            if (send(newSocket, &czekanieNaTure, sizeof (int), 0) < 0){
                 perror("wyslanie oczekiwanie na ruch gracza");
                 exit(EXIT_FAILURE);
             }
@@ -153,7 +161,7 @@ int main() {
     socklen_t addr_size;
 
     // Utwórz gniazdo.
-    serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+    serverSocket = socket(PF_INET, SOCK_STREAM, 0);
     if (serverSocket == -1) {
         perror("Błąd podczas tworzenia gniazda serwera");
         exit(EXIT_FAILURE);
@@ -167,7 +175,7 @@ int main() {
     bind(serverSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr));
 
     // Nasłuchuj na gnieździe i czekaj na połączenia.
-    if (listen(serverSocket, 10) == 0)
+    if (listen(serverSocket, 20) == 0)
         printf("Serwer nasłuchuje na porcie %d\n", PORT);
     else {
         perror("Błąd podczas nasłuchiwania");
@@ -179,16 +187,18 @@ int main() {
     while (1) {
         // Akceptuj połączenia i twórz nowe wątki dla każdego klienta.
         addr_size = sizeof serverStorage;
-        newSocket = accept(serverSocket, (struct sockaddr *)&serverStorage, &addr_size);
+        newSocket = accept(serverSocket, (struct sockaddr *) &serverStorage, &addr_size);
 
-        if (pthread_create(&thread_id, NULL, socketThread, &newSocket) != 0)
+        if (pthread_create(&thread_id, NULL, socketThread, &newSocket) != 0) {
             perror("Błąd podczas tworzenia wątku obsługi klienta");
-
+            close(newSocket);
+            continue;
+        }
         // Detach wątku, aby zwolnić zasoby automatycznie po zakończeniu wątku.
         pthread_detach(thread_id);
     }
 
-
+    fflush(stdout);
     // Zamknij gniazdo serwera
     close(serverSocket);
     return 0;

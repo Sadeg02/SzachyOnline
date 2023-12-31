@@ -6,9 +6,9 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include "szachownica.h"
+#include "szachownica.c"
 
-#define PORT 12345
+#define PORT 1100
 #define BUFFER_SIZE 256
 
 int main();
@@ -29,22 +29,35 @@ void interfejs(int numer,char kolor,int socket,int* flaga){
             printf("Wykonuj ruchy w nastepujacy sposob w formacie: \"figura ObecneXY PrzyszleXY\", czyli np.(p 21 31 ruch piona z pozycji 21 na pozycje 31)\n");
             break;
         case 2:
-            printf("Oczekiweanie na drugiego gracza\n");
+            if(*flaga==2){
+                printf("Oczekiweanie na drugiego gracza\n");
+                *flaga=1;
+            }
             break;
         case 3:
-            printf("Wykonaj ruch:");
-            *flaga = 1;
             char rozkaz[50];
             int pozwolenie;
             plansza szachownica;
+            if (recv(socket, &szachownica,sizeof(szachownica), 0) < 0) {
+                perror("pokaz szachownice error");
+                exit(EXIT_FAILURE);
+            }
+            show(&szachownica);
+
+            printf("\n");
+            printf("Wykonaj ruch:");
+            *flaga = 1;
+
             while(true) {
                 fgets(rozkaz, sizeof(rozkaz), stdin);
-                if (sscanf(rozkaz, "%*c %*2d %*2d") == 3) {
+                char fig;
+                int nowe,stare;
+                if (sscanf(rozkaz, "%c %2d %2d",&fig,&stare,&nowe) == 3) {
                     if (0 > send(socket, rozkaz, strlen(rozkaz), 0)) {
                         perror("blad wysylanie rozkazu");
                         exit(EXIT_FAILURE);
                     }
-                    if (recv(socket, &pozwolenie,1, 0) < 0) {
+                    if (recv(socket, &pozwolenie,sizeof(int), 0) < 0) {
                         perror("dostepnosc error");
                         exit(EXIT_FAILURE);
                     }
@@ -64,7 +77,7 @@ void interfejs(int numer,char kolor,int socket,int* flaga){
             }
             break;
         case 4:
-            if(flaga){
+            if(*flaga){
                 printf("Drugi gracz robi ruch\n");
                 *flaga=0;
             }
@@ -72,22 +85,28 @@ void interfejs(int numer,char kolor,int socket,int* flaga){
     }
 }
 void rozpocznijGre(int socket){
-    char kolorgracza;
-    int stan;
-    int flaga=1;
+    char kolorgracza=' ';
+    int stan=2;
+    //int poprzedni=20;
+    int flaga=2;
     //pobierz kolor od serwera
-    if (recv(socket, &kolorgracza,1, 0) < 0) {
-        perror("dostepnosc error");
+    if (recv(socket, &kolorgracza,sizeof(kolorgracza), 0) < 0) {
+        perror("kolor error");
         exit(EXIT_FAILURE);
     }
+    printf("kolor to %c \n", kolorgracza);
     //wprowadzenie
     interfejs(1,kolorgracza,socket,&flaga);
     while(true) {
         //odbiera stan
-        if (recv(socket, &stan, 1, 0) < 0) {
+        if (recv(socket, &stan, sizeof(int), 0) < 0) {
             perror("stan error");
             exit(EXIT_FAILURE);
         }
+        //if (poprzedni != stan) {
+        //printf("stan to %d \n", stan);
+        //poprzedni=stan;
+        //}
         //wykonuje odpowiednie komendy
         interfejs(stan,kolorgracza,socket,&flaga);
     }
@@ -99,11 +118,9 @@ int main() {
     int dostepneStoly;
 
     struct sockaddr_in serverAddr;
-    char buffer[BUFFER_SIZE];
-    char move[BUFFER_SIZE];
 
     // Create the socket
-    clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+    clientSocket = socket(PF_INET, SOCK_STREAM, 0);
     if (clientSocket == -1) {
         perror("Error creating client socket");
         return EXIT_FAILURE;
@@ -120,10 +137,11 @@ int main() {
         return EXIT_FAILURE;
     }
     printf("Witaj w SzachyOnline sprobujemy znalezc stol dla ciebie :)\n");
-    if (recv(clientSocket, &dostepneStoly,1, 0) < 0) {
+    if (recv(clientSocket, &dostepneStoly,sizeof(int), 0) < 0) {
         perror("dostepnosc error");
         exit(EXIT_FAILURE);
     }
+    printf("dostpene %d\n",dostepneStoly);
     if(dostepneStoly) {
         rozpocznijGre(clientSocket);
     }else{
