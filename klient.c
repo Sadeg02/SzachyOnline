@@ -9,7 +9,8 @@
 #include "szachownica.c"
 
 #define PORT 1100
-#define BUFFER_SIZE 256
+
+
 
 int main();
 void rozpocznijGre(int socket);
@@ -42,8 +43,12 @@ void interfejs(int numer,char kolor,int socket,int* flaga){
                 perror("pokaz szachownice error");
                 exit(EXIT_FAILURE);
             }
+            printf("\n");
+            printf("-----------------------\n");
+            printf("\n");
             show(&szachownica);
-
+            printf("\n");
+            printf("-----------------------\n");
             printf("\n");
             printf("Wykonaj ruch:");
             *flaga = 1;
@@ -66,7 +71,9 @@ void interfejs(int numer,char kolor,int socket,int* flaga){
                             perror("pokaz szachownice error");
                             exit(EXIT_FAILURE);
                         }
+                        printf("\n");
                         show(&szachownica);
+                        printf("\n");
                         break;
                     }else{
                         printf("Ruch byl zly wpisz jeszcze raz:");
@@ -87,6 +94,7 @@ void interfejs(int numer,char kolor,int socket,int* flaga){
 void rozpocznijGre(int socket){
     char kolorgracza=' ';
     int stan=2;
+    int online = 1;
     //int poprzedni=20;
     int flaga=2;
     //pobierz kolor od serwera
@@ -98,6 +106,10 @@ void rozpocznijGre(int socket){
     //wprowadzenie
     interfejs(1,kolorgracza,socket,&flaga);
     while(true) {
+        if (0 > send(socket, &online, sizeof(int), 0)) {
+            perror("blad wysylania bycia online");
+            exit(EXIT_FAILURE);
+        }
         //odbiera stan
         if (recv(socket, &stan, sizeof(int), 0) < 0) {
             perror("stan error");

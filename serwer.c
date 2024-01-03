@@ -28,6 +28,7 @@ int main();
 void stworzStoly(int ile, stol stoly[]);
 void *socketThread(void *arg);
 void rozpocznij(int newSocket,char kolorgracza,stol* s);
+void rozlaczenie(char komunikat[]);
 
 void stworzStoly(int ile, stol stoly[]) {
     for (int i = 0; i < ile; i++) {
@@ -37,6 +38,9 @@ void stworzStoly(int ile, stol stoly[]) {
         stoly[i].dostepny = true;
         stoly[i].tura='B';
     }
+}
+void rozlaczenie(char komunikat[]){
+    printf("%s \n",komunikat);
 }
 
 void *socketThread(void *arg) {
@@ -64,13 +68,13 @@ void *socketThread(void *arg) {
     if(id==-1){
         if ( send(newSocket, &brak_stolow, sizeof(int), 0) < 0){
             perror("blad brak stolow");
-            exit(EXIT_FAILURE);
+            //exit(EXIT_FAILURE);
         }
         pthread_exit(NULL);
     }else{
         if (0 > send(newSocket, &sa_stoly, sizeof(int), 0)){
             perror("blad sa stoly");
-            exit(EXIT_FAILURE);
+            //exit(EXIT_FAILURE);
         }
     }
 
@@ -78,7 +82,7 @@ void *socketThread(void *arg) {
     rozpocznij(newSocket,kolorgracza,&stoly[id]);
 
     // Zamknij gniazdo klienta i zwolnij zasoby
-    printf("odlaczony klient");
+    printf("odlaczony klient \n");
     close(newSocket);
 
     pthread_exit(NULL);
@@ -89,12 +93,19 @@ void rozpocznij(int newSocket,char kolorgracza,stol* s){
     const int oczekiwanie = 2;
     const int pozwolenieRuch =3;
     const int czekanieNaTure =4;
+    int online;
     printf("kolor %c \n",kolorgracza);
     if (send(newSocket, &kolorgracza, sizeof(kolorgracza), 0) < 0){
         perror("wyslanie koloru");
-        exit(EXIT_FAILURE);
+        //exit(EXIT_FAILURE);
     }
     while(true){
+        if (recv(newSocket,&online ,sizeof(int), 0) < 1) {
+            rozlaczenie("Rozlaczylo gracza");
+            break;
+
+            //exit(EXIT_FAILURE);
+        }
         if(s->dostepny==true){
             if (send(newSocket,&oczekiwanie, sizeof(int), 0) < 0){
                 perror("wyslanie oczekiwanie");
@@ -111,9 +122,10 @@ void rozpocznij(int newSocket,char kolorgracza,stol* s){
                 perror("wyslanie szachownicy");
                 exit(EXIT_FAILURE);
             }
-            if (recv(newSocket, &rozkaz,sizeof(rozkaz), 0) < 0) {
-                perror("dostepnosc error");
-                exit(EXIT_FAILURE);
+            if (recv(newSocket, &rozkaz,sizeof(rozkaz), 0) < 1) {
+                rozlaczenie("dostepnosc error");
+                break;
+                //exit(EXIT_FAILURE);
             }
             //sprawdzanie rozkazu
             odp=ruch(&(s->szachownica),rozkaz);
