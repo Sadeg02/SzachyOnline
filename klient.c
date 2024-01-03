@@ -105,6 +105,17 @@ void interfejs(int numer,char kolor,int socket,int* flaga){
                 *flaga=0;
             }
             break;
+        case 5:
+            char odpowiedz[100];
+            printf("Drugi gracz zostal rozlaczony\n");
+            printf("Jesli chcesz szukac nowej gry wpisz NOWA lub wyjsc wpisz cokolwiek:");
+            fgets(odpowiedz, sizeof(odpowiedz), stdin);
+
+            if (strcmp(odpowiedz, "NOWA\n") == 0) {
+                main();
+            }else{
+                exit(0);
+            }
     }
 }
 void rozpocznijGre(int socket){

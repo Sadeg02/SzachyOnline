@@ -83,8 +83,10 @@ void *socketThread(void *arg) {
 
     // Zamknij gniazdo klienta i zwolnij zasoby
     printf("odlaczony klient \n");
-    close(newSocket);
+    stoly[id].ilegraczy-=1;
+    inicjalizujSzachownice(&(stoly[id].szachownica));
 
+    close(newSocket);
     pthread_exit(NULL);
 }
 
@@ -93,6 +95,7 @@ void rozpocznij(int newSocket,char kolorgracza,stol* s){
     const int oczekiwanie = 2;
     const int pozwolenieRuch =3;
     const int czekanieNaTure =4;
+    const int rozlaceniegracza=5;
     int online;
     printf("kolor %c \n",kolorgracza);
     if (send(newSocket, &kolorgracza, sizeof(kolorgracza), 0) < 0){
@@ -111,6 +114,15 @@ void rozpocznij(int newSocket,char kolorgracza,stol* s){
                 perror("wyslanie oczekiwanie");
                 exit(EXIT_FAILURE);
             }
+        }else if(s->ilegraczy<2){
+            //inny gracz odlaczyl sie
+            s->dostepny=true;
+            rozlaczenie("Rozlaczylo z powodu utraty drugiego gracza");
+            if (send(newSocket, &rozlaceniegracza, sizeof(int), 0) < 0){
+                perror("wyslanie pozwolenia na ruch");
+                exit(EXIT_FAILURE);
+            }
+            break;
         }else if(s->tura==kolorgracza){
             char rozkaz[50];
             int odp;
