@@ -122,13 +122,15 @@ void rozpocznij(int newSocket,char kolorgracza,stol* s){
                 perror("wyslanie szachownicy");
                 exit(EXIT_FAILURE);
             }
-            if (recv(newSocket, &rozkaz,sizeof(rozkaz), 0) < 1) {
+            if (recv(newSocket, &rozkaz,sizeof(rozkaz), 0) < 0){
                 rozlaczenie("dostepnosc error");
                 break;
                 //exit(EXIT_FAILURE);
             }
             //sprawdzanie rozkazu
+            printf("%s \n",rozkaz);
             odp=ruch(&(s->szachownica),rozkaz);
+            printf("odp %d",odp);
             if(odp==2){
                 if (send(newSocket, &odp, sizeof(int), 0) < 0){
                     perror("dobry ruch");

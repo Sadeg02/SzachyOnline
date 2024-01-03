@@ -55,8 +55,9 @@ void show(const plansza *p) {
 }
 
 void zmiana(plansza *p, char sym, int starex, int starey, int nowex, int nowey) {
-    p->szachownica[starex][starey] = '.';
     p->szachownica[nowex][nowey] = sym;
+    p->szachownica[starex][starey] = '.';
+
 }
 
 void wstaw(plansza *p, char sym, int x, int y) {
@@ -67,16 +68,3 @@ char symbol(const plansza *p, int x, int y) {
     return p->szachownica[x][y];
 }
 
-
-void przekaz(const plansza *p, char *buffer) {
-    int index = 0;
-    for (int i = 0; i < ROZMIAR; ++i) {
-        for (int j = 0; j < ROZMIAR; ++j) {
-            buffer[index++] = p->szachownica[i][j];
-            buffer[index++] = ' ';  // Dodaj odstęp między znakami
-        }
-        buffer[index++] = '\n';  // Dodaj nową linię po każdym wierszu
-    }
-
-    buffer[index] = '\0';  // Dodaj null terminator na końcu bufora
-}

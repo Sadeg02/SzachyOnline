@@ -38,30 +38,38 @@ void blad(int numer) {
 
 char kolor(char kol) {
     if (kol >= 'A' && kol <= 'Z') {
-        return 'B';
-    } else if (kol >= 'a' && kol <= 'z') {
         return 'C';
+    } else if (kol >= 'a' && kol <= 'z') {
+        return 'B';
     } else {
         return '.';
     }
 }
 
-void pion(plansza *plan, char sym, int starex, int starey, int nowex, int nowey) {
-    if (starey == nowey && (((starex + 1) == nowex && kolor(sym) == 'C' )|| ((starex - 1) == nowex && kolor(sym) == 'B')) &&
-        plan->szachownica[nowex][nowey] == '.') {
-        plan->szachownica[nowex][nowey] = sym;
-        plan->szachownica[starex][starey] = '.';
+int pion(plansza *plan, char sym, int starex, int starey, int nowex, int nowey) {
+    //ruch do przodu
+    if (starey == nowey && (((starex - 1) == nowex && kolor(sym) == 'C' )|| ((starex + 1) == nowex && kolor(sym) == 'B')) &&
+            symbol(plan, nowex, nowey) == '.') {
+        zmiana(plan,  sym, starex, starey, nowex, nowey);
+        return 2;
+        // bicie
     } else if ((starey + 1 == nowey || starey - 1 == nowey) &&
-               ((starex + 1 == nowex && kolor(sym) == 'C') || (starex - 1 == nowex && kolor(sym) == 'B')) &&
-               kolor(sym) != kolor(plan->szachownica[nowex][nowey])) {
-        plan->szachownica[nowex][nowey] = sym;
-        plan->szachownica[starex][starey] = '.';
+               ((starex - 1 == nowex && kolor(sym) == 'C') || (starex + 1 == nowex && kolor(sym) == 'B')) &&
+               kolor(sym) != kolor(symbol(plan, nowex, nowey))) {
+        if(kolor(symbol(plan, nowex, nowey))=='.'){
+            blad(1);
+            return 1;
+        }
+        zmiana(plan,  sym, starex, starey, nowex, nowey);
+        return 2;
     } else {
         blad(1);
+        return 1;
     }
+
 }
 
-void wieza(plansza *plan, char sym, int starex, int starey, int nowex, int nowey) {
+int wieza(plansza *plan, char sym, int starex, int starey, int nowex, int nowey) {
     if (starex == nowex || starey == nowey) {
         int stepX = (nowex > starex) ? 1 : (nowex < starex) ? -1 : 0;
         int stepY = (nowey > starey) ? 1 : (nowey < starey) ? -1 : 0;
@@ -72,7 +80,7 @@ void wieza(plansza *plan, char sym, int starex, int starey, int nowex, int nowey
         while (currentX != nowex || currentY != nowey) {
             if (plan->szachownica[currentX][currentY] != '.') {
                 blad(2);
-                return;
+                return 1;
             }
 
             currentX += stepX;
@@ -80,33 +88,39 @@ void wieza(plansza *plan, char sym, int starex, int starey, int nowex, int nowey
         }
 
         if (kolor(sym) != kolor(plan->szachownica[nowex][nowey])) {
-            plan->szachownica[nowex][nowey] = sym;
-            plan->szachownica[starex][starey] = '.';
+            zmiana(plan,  sym, starex, starey, nowex, nowey);
+            return 2;
         } else {
             blad(4);
+            return 1;
         }
     } else {
         blad(8);
+        return 1;
     }
+
 }
 
-void skoczek(plansza *plan, char sym, int starex, int starey, int nowex, int nowey) {
+int skoczek(plansza *plan, char sym, int starex, int starey, int nowex, int nowey) {
     int deltaX = abs(nowex - starex);
     int deltaY = abs(nowey - starey);
 
     if ((deltaX == 1 && deltaY == 2) || (deltaX == 2 && deltaY == 1)) {
         if (kolor(sym) != kolor(plan->szachownica[nowex][nowey])) {
-            plan->szachownica[nowex][nowey] = sym;
-            plan->szachownica[starex][starey] = '.';
+            zmiana(plan,  sym, starex, starey, nowex, nowey);
+            return 2;
         } else {
             blad(4);
+            return 1;
         }
     } else {
         blad(8);
+        return 1;
     }
+
 }
 
-void goniec(plansza *plan, char sym, int starex, int starey, int nowex, int nowey) {
+int goniec(plansza *plan, char sym, int starex, int starey, int nowex, int nowey) {
     int deltaX = abs(nowex - starex);
     int deltaY = abs(nowey - starey);
 
@@ -120,7 +134,7 @@ void goniec(plansza *plan, char sym, int starex, int starey, int nowex, int nowe
         while (currentX != nowex && currentY != nowey) {
             if (plan->szachownica[currentX][currentY] != '.') {
                 blad(2);
-                return;
+                return 1;
             }
 
             currentX += stepX;
@@ -128,33 +142,39 @@ void goniec(plansza *plan, char sym, int starex, int starey, int nowex, int nowe
         }
 
         if (kolor(sym) != kolor(plan->szachownica[nowex][nowey])) {
-            plan->szachownica[nowex][nowey] = sym;
-            plan->szachownica[starex][starey] = '.';
+            zmiana(plan,  sym, starex, starey, nowex, nowey);
+            return 2;
         } else {
             blad(4);
+            return 1;
         }
     } else {
         blad(8);
+        return 1;
     }
+
 }
 
-void krol(plansza *plan, char sym, int starex, int starey, int nowex, int nowey) {
+int krol(plansza *plan, char sym, int starex, int starey, int nowex, int nowey) {
     int deltaX = abs(nowex - starex);
     int deltaY = abs(nowey - starey);
 
     if ((deltaX <= 1 && deltaY <= 1) && (deltaX != 0 || deltaY != 0)) {
         if (kolor(sym) != kolor(plan->szachownica[nowex][nowey])) {
-            plan->szachownica[nowex][nowey] = sym;
-            plan->szachownica[starex][starey] = '.';
+            zmiana(plan,  sym, starex, starey, nowex, nowey);
+            return 2;
         } else {
             blad(4);
+            return 1;
         }
     } else {
         blad(8);
+        return 1;
     }
+
 }
 
-void hetman(plansza *plan, char sym, int starex, int starey, int nowex, int nowey) {
+int hetman(plansza *plan, char sym, int starex, int starey, int nowex, int nowey) {
     if (starex == nowex || starey == nowey || abs(nowex - starex) == abs(nowey - starey)) {
         int stepX = (nowex > starex) ? 1 : (nowex < starex) ? -1 : 0;
         int stepY = (nowey > starey) ? 1 : (nowey < starey) ? -1 : 0;
@@ -165,7 +185,7 @@ void hetman(plansza *plan, char sym, int starex, int starey, int nowex, int nowe
         while (currentX != nowex || currentY != nowey) {
             if (plan->szachownica[currentX][currentY] != '.') {
                 blad(2);
-                return;
+                return 1;
             }
 
             currentX += stepX;
@@ -173,30 +193,34 @@ void hetman(plansza *plan, char sym, int starex, int starey, int nowex, int nowe
         }
 
         if (kolor(sym) != kolor(plan->szachownica[nowex][nowey])) {
-            plan->szachownica[nowex][nowey] = sym;
-            plan->szachownica[starex][starey] = '.';
+            zmiana(plan,  sym, starex, starey, nowex, nowey);
+            return 2;
         } else {
             blad(4);
+            return 1;
         }
     } else {
         blad(8);
+        return 1;
     }
+
 }
 
 int ruch(plansza *plan, char rozkaz[]) {
     char figura;
     int starePole,nowePole;
-
+    printf("%s \n",rozkaz);
     sscanf(rozkaz, "%c %2d %2d", &figura, &starePole, &nowePole);
     int stareX = starePole/10;
     int stareY = starePole%10;
     int noweX = nowePole/10;
     int noweY = nowePole%10;
-    //printf("Figura: %c\n", figura);
-    //printf("Stare pole: (%d, %d)\n", stareX, stareY);
-    //printf("Nowe pole: (%d, %d)\n", noweX, noweY);
+    printf("Figura: %c\n", figura);
+    printf("Stare pole: (%d, %d)\n", stareX, stareY);
+    printf("Nowe pole: (%d, %d)\n", noweX, noweY);
 
     if (symbol(plan,stareX,stareY)!=figura){
+        printf("%d ,%d , %c \n",stareX,stareY,figura);
         blad(9);
         return 1;
     }
@@ -207,30 +231,30 @@ int ruch(plansza *plan, char rozkaz[]) {
         switch (figura) {
             case 'p':
             case 'P':
-                pion(plan, figura, stareX, stareY, noweX, noweY);
-                break;
+                return pion(plan, figura, stareX, stareY, noweX, noweY);
+
             case 'W':
             case 'w':
-                wieza(plan, figura, stareX, stareY, noweX, noweY);
-                break;
+                return wieza(plan, figura, stareX, stareY, noweX, noweY);
+
             case 'S':
             case 's':
-                skoczek(plan, figura, stareX, stareY, noweX, noweY);
-                break;
+                return skoczek(plan, figura, stareX, stareY, noweX, noweY);
+
             case 'G':
             case 'g':
-                goniec(plan, figura, stareX, stareY, noweX, noweY);
-                break;
+                return goniec(plan, figura, stareX, stareY, noweX, noweY);
+
             case 'K':
             case 'k':
-                krol(plan, figura, stareX, stareY, noweX, noweY);
-                break;
+                return krol(plan, figura, stareX, stareY, noweX, noweY);
+
             case 'H':
             case 'h':
-                hetman(plan, figura, stareX, stareY, noweX, noweY);
-                break;
+                return hetman(plan, figura, stareX, stareY, noweX, noweY);
+
             default:
-                blad(9);
+                blad(1);
                 return 1;
         }
     }

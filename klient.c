@@ -10,7 +10,7 @@
 
 #define PORT 1100
 
-
+int online = 1;
 
 int main();
 void rozpocznijGre(int socket);
@@ -36,8 +36,6 @@ void interfejs(int numer,char kolor,int socket,int* flaga){
             }
             break;
         case 3:
-            char rozkaz[50];
-            int pozwolenie;
             plansza szachownica;
             if (recv(socket, &szachownica,sizeof(szachownica), 0) < 0) {
                 perror("pokaz szachownice error");
@@ -48,24 +46,28 @@ void interfejs(int numer,char kolor,int socket,int* flaga){
             printf("\n");
             show(&szachownica);
             printf("\n");
-            printf("-----------------------\n");
-            printf("\n");
             printf("Wykonaj ruch:");
+
             *flaga = 1;
 
             while(true) {
+                char rozkaz[50];
+                int pozwolenie;
                 fgets(rozkaz, sizeof(rozkaz), stdin);
                 char fig;
                 int nowe,stare;
                 if (sscanf(rozkaz, "%c %2d %2d",&fig,&stare,&nowe) == 3) {
-                    if (0 > send(socket, rozkaz, strlen(rozkaz), 0)) {
+                    printf("%s \n",rozkaz);
+                    if (0 > send(socket, rozkaz, sizeof(rozkaz), 0)) {
                         perror("blad wysylanie rozkazu");
                         exit(EXIT_FAILURE);
                     }
+                    printf("%s \n",rozkaz);
                     if (recv(socket, &pozwolenie,sizeof(int), 0) < 0) {
                         perror("dostepnosc error");
                         exit(EXIT_FAILURE);
                     }
+                    printf("poz %d \n",pozwolenie);
                     if(pozwolenie == 2){
                         if (recv(socket, &szachownica,sizeof(szachownica), 0) < 0) {
                             perror("pokaz szachownice error");
@@ -77,6 +79,20 @@ void interfejs(int numer,char kolor,int socket,int* flaga){
                         break;
                     }else{
                         printf("Ruch byl zly wpisz jeszcze raz:");
+                        // kod pomijajacy operacjie w petli glownej
+                        if (0 > send(socket, &online, sizeof(int), 0)) {
+                            perror("blad wysylania bycia online");
+                            exit(EXIT_FAILURE);
+                        }
+                        int cos;
+                        if (recv(socket, &cos, sizeof(int), 0) < 0) {
+                            perror("stan error");
+                            exit(EXIT_FAILURE);
+                        }
+                        if (recv(socket, &szachownica,sizeof(szachownica), 0) < 0) {
+                            perror("pokaz szachownice error");
+                            exit(EXIT_FAILURE);
+                        }
                     }
                 }else{
                     printf("Zly format wpisz jeszcze raz:");
@@ -85,7 +101,7 @@ void interfejs(int numer,char kolor,int socket,int* flaga){
             break;
         case 4:
             if(*flaga){
-                printf("Drugi gracz robi ruch\n");
+                printf("Drugi gracz robi ruch...\n");
                 *flaga=0;
             }
             break;
@@ -94,7 +110,7 @@ void interfejs(int numer,char kolor,int socket,int* flaga){
 void rozpocznijGre(int socket){
     char kolorgracza=' ';
     int stan=2;
-    int online = 1;
+
     //int poprzedni=20;
     int flaga=2;
     //pobierz kolor od serwera
