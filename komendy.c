@@ -7,9 +7,9 @@
 
 
 #define ROZMIAR 9
-#define TRWA 1
-#define WINBIALE 2
-#define WINCZARNE 3
+#define TRWA 0
+#define WINBIALE 1
+#define WINCZARNE 2
 
 void blad(int numer) {
     switch (numer) {
@@ -26,7 +26,7 @@ void blad(int numer) {
             printf("Nieprawidlowy ruch\n");
             break;
         case 9:
-            printf("Nieprawidlowa figura\n");
+            printf("Nieprawidlowa figura lub jej kolor\n");
             break;
         case 10:
             printf("Ruch poza plansze\n");
@@ -206,21 +206,20 @@ int hetman(plansza *plan, char sym, int starex, int starey, int nowex, int nowey
 
 }
 
-int ruch(plansza *plan, char rozkaz[]) {
+int ruch(plansza *plan, char rozkaz[],char koloraktywnegogracza) {
     char figura;
     int starePole,nowePole;
-    printf("%s \n",rozkaz);
+    //printf("%s \n",rozkaz);
     sscanf(rozkaz, "%c %2d %2d", &figura, &starePole, &nowePole);
     int stareX = starePole/10;
     int stareY = starePole%10;
     int noweX = nowePole/10;
     int noweY = nowePole%10;
-    printf("Figura: %c\n", figura);
-    printf("Stare pole: (%d, %d)\n", stareX, stareY);
-    printf("Nowe pole: (%d, %d)\n", noweX, noweY);
+    //printf("Figura: %c\n", figura);
+    //printf("Stare pole: (%d, %d)\n", stareX, stareY);
+    //printf("Nowe pole: (%d, %d)\n", noweX, noweY);
 
-    if (symbol(plan,stareX,stareY)!=figura){
-        printf("%d ,%d , %c \n",stareX,stareY,figura);
+    if (symbol(plan,stareX,stareY)!=figura&&kolor(figura)!=koloraktywnegogracza){
         blad(9);
         return 1;
     }
@@ -269,12 +268,11 @@ int czyKoniec(plansza *szachownica) {
     bool krolbiale = false;
     bool krolczarne = false;
     // Przeszukaj tablicę w poszukiwaniu króla 'k' lub 'K'
-    for (int i = 0; i < 8; ++i) {
-        for (int j = 0; j < 8; ++j) {
-            char figura = szachownica->szachownica[i][j];
-            if (figura == 'k') {
+    for (int i = 1; i < 9; ++i) {
+        for (int j = 1; j < 9; ++j) {
+            if (symbol(szachownica,i,j) == 'k') {
                 krolbiale = true;
-            } else if (figura == 'K') {
+            } else if (symbol(szachownica,i,j) == 'K') {
                 krolczarne = true;
             }
         }

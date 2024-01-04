@@ -15,10 +15,31 @@ int online = 1;
 int main();
 void rozpocznijGre(int socket);
 void interfejs(int numer,char kolor,int socket,int* flaga);
+void nowaGra();
+void linia();
+
+void linia(){
+    printf("\n");
+    printf("-----------------------\n");
+    printf("\n");
+}
+
+void nowaGra(){
+    char odpowiedz[100];
+    printf("\n");
+    printf("Jesli chcesz szukac nowej gry wpisz NOWA lub wyjsc wpisz cokolwiek:");
+    fgets(odpowiedz, sizeof(odpowiedz), stdin);
+
+    if (strcmp(odpowiedz, "NOWA\n") == 0) {
+        main();
+    }else{
+        exit(0);
+    }
+}
 
 void interfejs(int numer,char kolor,int socket,int* flaga){
     switch (numer) {
-        case 1:
+        case 1://poczatek przywitanie
             printf("Witaj zaraz rozpocznie sie rozgrywka\n");
             if(kolor=='B'){
                 printf("Bedziesz gral Bialymi figurami, ktre sa reprezentowane przez male litery \n");
@@ -29,21 +50,19 @@ void interfejs(int numer,char kolor,int socket,int* flaga){
             }
             printf("Wykonuj ruchy w nastepujacy sposob w formacie: \"figura ObecneXY PrzyszleXY\", czyli np.(p 21 31 ruch piona z pozycji 21 na pozycje 31)\n");
             break;
-        case 2:
+        case 2://oczekiwanie na drugiego gracza do gry
             if(*flaga==2){
                 printf("Oczekiweanie na drugiego gracza\n");
                 *flaga=1;
             }
             break;
-        case 3:
+        case 3://obsluga ruchu aktywnego gracza
             plansza szachownica;
             if (recv(socket, &szachownica,sizeof(szachownica), 0) < 0) {
                 perror("pokaz szachownice error");
                 exit(EXIT_FAILURE);
             }
-            printf("\n");
-            printf("-----------------------\n");
-            printf("\n");
+            linia();
             show(&szachownica);
             printf("\n");
             printf("Wykonaj ruch:");
@@ -62,12 +81,12 @@ void interfejs(int numer,char kolor,int socket,int* flaga){
                         perror("blad wysylanie rozkazu");
                         exit(EXIT_FAILURE);
                     }
-                    printf("%s \n",rozkaz);
+                    //printf("%s \n",rozkaz);
                     if (recv(socket, &pozwolenie,sizeof(int), 0) < 0) {
                         perror("dostepnosc error");
                         exit(EXIT_FAILURE);
                     }
-                    printf("poz %d \n",pozwolenie);
+                    //printf("poz %d \n",pozwolenie);
                     if(pozwolenie == 2){
                         if (recv(socket, &szachownica,sizeof(szachownica), 0) < 0) {
                             perror("pokaz szachownice error");
@@ -99,23 +118,46 @@ void interfejs(int numer,char kolor,int socket,int* flaga){
                 }
             }
             break;
-        case 4:
+        case 4://oczekiwanie na ruch drugiego gracza
             if(*flaga){
                 printf("Drugi gracz robi ruch...\n");
                 *flaga=0;
             }
             break;
-        case 5:
-            char odpowiedz[100];
+        case 5://rozlaczenie gracza
             printf("Drugi gracz zostal rozlaczony\n");
-            printf("Jesli chcesz szukac nowej gry wpisz NOWA lub wyjsc wpisz cokolwiek:");
-            fgets(odpowiedz, sizeof(odpowiedz), stdin);
-
-            if (strcmp(odpowiedz, "NOWA\n") == 0) {
-                main();
+            nowaGra();
+        case 6://wygrana bialych
+            if(kolor=='B'){
+                printf("Gratulacje wygrales!!!\n");
             }else{
-                exit(0);
+                if (recv(socket, &szachownica,sizeof(szachownica), 0) < 0) {
+                    perror("pokaz szachownice error");
+                    exit(EXIT_FAILURE);
+                }
+                linia();
+                show(&szachownica);
+                printf("\n");
+                printf("Niestety Szach Mat przegrywasz :(\n");
             }
+            nowaGra();
+            break;
+        case 7://wygrana czarnych
+            if(kolor=='C'){
+                printf("\n");
+                printf("Gratulacje wygrales!!!\n");
+            }else{
+                if (recv(socket, &szachownica,sizeof(szachownica), 0) < 0) {
+                    perror("pokaz szachownice error");
+                    exit(EXIT_FAILURE);
+                }
+                linia();
+                show(&szachownica);
+                printf("\n");
+                printf("Niestety Szach Mat przegrywasz :(\n");
+            }
+            nowaGra();
+            break;
     }
 }
 void rozpocznijGre(int socket){
@@ -129,7 +171,7 @@ void rozpocznijGre(int socket){
         perror("kolor error");
         exit(EXIT_FAILURE);
     }
-    printf("kolor to %c \n", kolorgracza);
+    //printf("kolor to %c \n", kolorgracza);
     //wprowadzenie
     interfejs(1,kolorgracza,socket,&flaga);
     while(true) {

@@ -46,56 +46,61 @@ void rozlaczenie(char komunikat[]){
 void *socketThread(void *arg) {
     printf("nowy gracz \n");
     int newSocket = *((int *) arg);
-    int brak_stolow=0;
-    int sa_stoly=1;
+    int brak_stolow = 0;
+    int sa_stoly = 1;
 
-    char kolorgracza=' ';
-    int id=-1;
+    char kolorgracza = ' ';
+    int id = -1;
     // Tutaj możesz sprawdzić dostępność stołów
     for (int i = 0; i < MAXSTOLY; i++) {
         if (stoly[i].dostepny) {
-            id=i;
-            stoly[i].ilegraczy+=1;
-            kolorgracza='B';
-            if(stoly[i].ilegraczy==2){
-                kolorgracza='C';
-                stoly[i].dostepny=false;
+            id = i;
+            stoly[i].ilegraczy += 1;
+            kolorgracza = 'B';
+            if (stoly[i].ilegraczy == 2) {
+                kolorgracza = 'C';
+                stoly[i].dostepny = false;
             }
             break;
         }
     }
     //informacja o stole
-    if(id==-1){
-        if ( send(newSocket, &brak_stolow, sizeof(int), 0) < 0){
+    if (id == -1) {
+        if (send(newSocket, &brak_stolow, sizeof(int), 0) < 0) {
             perror("blad brak stolow");
             //exit(EXIT_FAILURE);
         }
         pthread_exit(NULL);
-    }else{
-        if (0 > send(newSocket, &sa_stoly, sizeof(int), 0)){
+    } else {
+        if (0 > send(newSocket, &sa_stoly, sizeof(int), 0)) {
             perror("blad sa stoly");
             //exit(EXIT_FAILURE);
         }
     }
 
     //jest stol rozpocznij rozgrywke
-    rozpocznij(newSocket,kolorgracza,&stoly[id]);
+    rozpocznij(newSocket, kolorgracza, &stoly[id]);
 
-    // Zamknij gniazdo klienta i zwolnij zasoby
+    // Zamknij gniazdo klienta i zwolnij stol
     printf("odlaczony klient \n");
-    stoly[id].ilegraczy-=1;
-    inicjalizujSzachownice(&(stoly[id].szachownica));
-
+    stoly[id].ilegraczy -= 1;
+    if (stoly[id].ilegraczy == 0) {
+        stoly[id].dostepny=true;
+        inicjalizujSzachownice(&(stoly[id].szachownica));
+    }
     close(newSocket);
     pthread_exit(NULL);
 }
 
 void rozpocznij(int newSocket,char kolorgracza,stol* s){
-
+    //komendy  do interfejsu klienta
     const int oczekiwanie = 2;
     const int pozwolenieRuch =3;
     const int czekanieNaTure =4;
     const int rozlaceniegracza=5;
+    const int winBiale=6;
+    const int winCzarne=7;
+
     int online;
     printf("kolor %c \n",kolorgracza);
     if (send(newSocket, &kolorgracza, sizeof(kolorgracza), 0) < 0){
@@ -106,17 +111,42 @@ void rozpocznij(int newSocket,char kolorgracza,stol* s){
         if (recv(newSocket,&online ,sizeof(int), 0) < 1) {
             rozlaczenie("Rozlaczylo gracza");
             break;
-
-            //exit(EXIT_FAILURE);
         }
         if(s->dostepny==true){
             if (send(newSocket,&oczekiwanie, sizeof(int), 0) < 0){
                 perror("wyslanie oczekiwanie");
                 exit(EXIT_FAILURE);
             }
+        }else if(czyKoniec(&(s->szachownica))>0){
+            if(czyKoniec(&(s->szachownica))==1){//wygraly biale
+                if (send(newSocket, &winBiale, sizeof(int), 0) < 0){
+                    perror("wyslanie win biale");
+                    exit(EXIT_FAILURE);
+                }
+                if(kolorgracza=='C'){
+                    if (send(newSocket, &(s->szachownica), sizeof(s->szachownica), 0) < 0){
+                        perror("wyslanie szachownicy");
+                        exit(EXIT_FAILURE);
+                    }
+                }
+                printf("Gre wygral bialy gracz\n");
+                break;
+            }else if(czyKoniec(&(s->szachownica))==2){//wygraly czarne
+                if (send(newSocket, &winCzarne, sizeof(int), 0) < 0){
+                    perror("wyslanie win czarne");
+                    exit(EXIT_FAILURE);
+                }
+                if(kolorgracza=='B'){
+                    if (send(newSocket, &(s->szachownica), sizeof(s->szachownica), 0) < 0){
+                        perror("wyslanie szachownicy");
+                        exit(EXIT_FAILURE);
+                    }
+                }
+                printf("Gre wygral czarny gracz\n");
+                break;
+            }
         }else if(s->ilegraczy<2){
             //inny gracz odlaczyl sie
-            s->dostepny=true;
             rozlaczenie("Rozlaczylo z powodu utraty drugiego gracza");
             if (send(newSocket, &rozlaceniegracza, sizeof(int), 0) < 0){
                 perror("wyslanie pozwolenia na ruch");
@@ -140,9 +170,8 @@ void rozpocznij(int newSocket,char kolorgracza,stol* s){
                 //exit(EXIT_FAILURE);
             }
             //sprawdzanie rozkazu
-            printf("%s \n",rozkaz);
-            odp=ruch(&(s->szachownica),rozkaz);
-            printf("odp %d",odp);
+            odp=ruch(&(s->szachownica),rozkaz,kolorgracza);
+
             if(odp==2){
                 if (send(newSocket, &odp, sizeof(int), 0) < 0){
                     perror("dobry ruch");

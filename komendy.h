@@ -17,7 +17,7 @@ int skoczek(plansza *plan, char sym, int starex, int starey, int nowex, int nowe
 int goniec(plansza *plan, char sym, int starex, int starey, int nowex, int nowey);
 int krol(plansza *plan, char sym, int starex, int starey, int nowex, int nowey);
 int hetman(plansza *plan, char sym, int starex, int starey, int nowex, int nowey);
-int ruch(plansza *plan, char rozkaz[]);
+int ruch(plansza *plan, char rozkaz[],char koloraktywnegogracza);
 bool zakresPlanszy(int nowex, int nowey);
 int czyKoniec(plansza *szachownica);
 
