@@ -219,7 +219,7 @@ int ruch(plansza *plan, char rozkaz[],char koloraktywnegogracza) {
     //printf("Stare pole: (%d, %d)\n", stareX, stareY);
     //printf("Nowe pole: (%d, %d)\n", noweX, noweY);
 
-    if (symbol(plan,stareX,stareY)!=figura&&kolor(figura)!=koloraktywnegogracza){
+    if (symbol(plan,stareX,stareY)!=figura||kolor(figura)!=koloraktywnegogracza){
         blad(9);
         return 1;
     }

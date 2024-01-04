@@ -42,17 +42,19 @@ void interfejs(int numer,char kolor,int socket,int* flaga){
         case 1://poczatek przywitanie
             printf("Witaj zaraz rozpocznie sie rozgrywka\n");
             if(kolor=='B'){
-                printf("Bedziesz gral Bialymi figurami, ktre sa reprezentowane przez male litery \n");
+                printf("Bedziesz gral Bialymi figurami, ktore sa reprezentowane przez male litery \n");
             }else if(kolor =='C'){
-                printf("Bedziesz gral Czarnymi figurami, ktre sa reprezentowane przez wielkie litery \n");
+                printf("Bedziesz gral Czarnymi figurami, ktore sa reprezentowane przez wielkie litery \n");
             }else{
                 printf("blad nie wybralo kolru zresetuj gre\n");
             }
             printf("Wykonuj ruchy w nastepujacy sposob w formacie: \"figura ObecneXY PrzyszleXY\", czyli np.(p 21 31 ruch piona z pozycji 21 na pozycje 31)\n");
+            printf("\n");
             break;
         case 2://oczekiwanie na drugiego gracza do gry
             if(*flaga==2){
-                printf("Oczekiweanie na drugiego gracza\n");
+                printf("Oczekiweanie na drugiego gracza...\n");
+                printf("\n");
                 *flaga=1;
             }
             break;
@@ -76,7 +78,6 @@ void interfejs(int numer,char kolor,int socket,int* flaga){
                 char fig;
                 int nowe,stare;
                 if (sscanf(rozkaz, "%c %2d %2d",&fig,&stare,&nowe) == 3) {
-                    printf("%s \n",rozkaz);
                     if (0 > send(socket, rozkaz, sizeof(rozkaz), 0)) {
                         perror("blad wysylanie rozkazu");
                         exit(EXIT_FAILURE);
@@ -97,7 +98,7 @@ void interfejs(int numer,char kolor,int socket,int* flaga){
                         printf("\n");
                         break;
                     }else{
-                        printf("Ruch byl zly wpisz jeszcze raz:");
+
                         // kod pomijajacy operacjie w petli glownej
                         if (0 > send(socket, &online, sizeof(int), 0)) {
                             perror("blad wysylania bycia online");
@@ -108,10 +109,14 @@ void interfejs(int numer,char kolor,int socket,int* flaga){
                             perror("stan error");
                             exit(EXIT_FAILURE);
                         }
+                        if(cos==5){
+                            interfejs(5,kolor,socket,flaga);
+                        }
                         if (recv(socket, &szachownica,sizeof(szachownica), 0) < 0) {
                             perror("pokaz szachownice error");
                             exit(EXIT_FAILURE);
                         }
+                        printf("Ruch byl zly wpisz jeszcze raz:");
                     }
                 }else{
                     printf("Zly format wpisz jeszcze raz:");
@@ -217,16 +222,17 @@ int main() {
         close(clientSocket);
         return EXIT_FAILURE;
     }
+    printf("\n");
     printf("Witaj w SzachyOnline sprobujemy znalezc stol dla ciebie :)\n");
+    printf("\n");
     if (recv(clientSocket, &dostepneStoly,sizeof(int), 0) < 0) {
         perror("dostepnosc error");
         exit(EXIT_FAILURE);
     }
-    printf("dostpene %d\n",dostepneStoly);
     if(dostepneStoly) {
         rozpocznijGre(clientSocket);
     }else{
-        printf("Wszystkie stoly zajete");
+        printf("Wszystkie stoly zajete przepraszamy, sproboj pózniej :(\n");
     }
 
 

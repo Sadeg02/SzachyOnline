@@ -23,14 +23,13 @@ void inicjalizujSzachownice(plansza *p) {
 
     p->szachownica[1][1] = 'w';
     p->szachownica[1][8] = 'w';
-    p->szachownica[4][4] = 'w'; // test
+    //p->szachownica[4][4] = 'w'; // test
     p->szachownica[8][1] = 'W';
     p->szachownica[8][8] = 'W';
-    p->szachownica[3][4] = 'W'; //test
+    //p->szachownica[3][4] = 'W'; //test
 
     p->szachownica[1][2] = 's';
     p->szachownica[1][7] = 's';
-    p->szachownica[4][5] = 's'; // test
     p->szachownica[8][2] = 'S';
     p->szachownica[8][7] = 'S';
 
