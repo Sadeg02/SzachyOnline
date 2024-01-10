@@ -12,7 +12,7 @@
 #include <stdbool.h>
 
 
-#define MAXSTOLY 3
+#define MAXSTOLY 3 //liczba stolow na serwerze
 #define PORT 1100
 
 typedef struct {
