@@ -3,5 +3,7 @@
 ## Opis projektu  
 
 Projekt Szachy Online jest realizowany w ramach przedmiotu Sieci Komputerowe 2 na Politechnice Poznańskiej. Celem projektu jest stworzenie platformy umożliwiającej rozgrywki szachowe online między dwoma graczami. Platforma będzie obsługiwać wiele równoległych rozgrywek, a ruchy graczy będą walidowane po stronie serwera.  
-
-![example workflow](https://github.com/Sadeg02/SzachyOnline/actions/workflows/c-cpp.yml/badge.svg)
+  
+Plik odpalający serwer to serwer.c  
+Plik odpalający klienta to klient.c  
+Pliki z komendami do obsługi rozgrywki w szachy to szachownica.c i komendy.c  
