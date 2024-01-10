@@ -192,8 +192,6 @@ void rozpocznij(int newSocket,char kolorgracza,stol* s){
                     exit(EXIT_FAILURE);
                 }
             }
-            //jesli tak wysylasz pozwolenie 1 lub 0 nie
-            //po pozwoleniu wyslij tablice
 
         }else{
             if (send(newSocket, &czekanieNaTure, sizeof (int), 0) < 0){
